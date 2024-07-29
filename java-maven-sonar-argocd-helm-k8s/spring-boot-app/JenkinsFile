@@ -8,8 +8,7 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        sh 'echo passed'
-        //git branch: 'main', url: 'https://github.com/Soumyajit-Rout/Jenkins-Zero-To-Hero.git'
+        git branch: 'main', url: 'https://github.com/Soumyajit-Rout/Jenkins-Zero-To-Hero.git', credentialsId: 'github-credentials-id'
       }
     }
     stage('Build and Test') {
@@ -55,8 +54,9 @@ pipeline {
                 sh '''
                     git config user.email "soumyajit.xyz@gmail.com"
                     git config user.name "Soumyajit Rout"
-                    BUILD_NUMBER=${BUILD_NUMBER}
-                    sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
+                    git checkout main
+                    IMAGE_NAME=soumyajitrout/ultimate-cicd:${BUILD_NUMBER}
+                    sed -i "s|image:.*|image: ${IMAGE_NAME}|g" java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
                     git add java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
                     git commit -m "Update deployment image to version ${BUILD_NUMBER}"
                     git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
